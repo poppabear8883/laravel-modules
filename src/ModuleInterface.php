@@ -6,8 +6,9 @@ use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Nwidart\Modules\Contracts\ModuleInterface;
 
-class Module extends ServiceProvider
+class ModuleInterface extends ServiceProvider implements ModuleInterface
 {
     /**
      * The laravel application instance.

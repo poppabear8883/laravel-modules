@@ -3,8 +3,9 @@
 namespace Nwidart\Modules\Commands;
 
 use Illuminate\Console\Command;
+use Nwidart\Modules\Contracts\RepositoryInterface;
 use Nwidart\Modules\Migrations\Migrator;
-use Nwidart\Modules\Module;
+use Nwidart\Modules\ModuleInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -25,7 +26,7 @@ class MigrateCommand extends Command
     protected $description = 'Migrate the migrations from the specified module or from all modules.';
 
     /**
-     * @var \Nwidart\Modules\Repository
+     * @var RepositoryInterface
      */
     protected $module;
 
@@ -56,11 +57,11 @@ class MigrateCommand extends Command
     /**
      * Run the migration from the specified module.
      *
-     * @param Module $module
+     * @param ModuleInterface $module
      *
      * @return mixed
      */
-    protected function migrate(Module $module)
+    protected function migrate(ModuleInterface $module)
     {
         $path = str_replace(base_path(), '', (new Migrator($module))->getPath());
         

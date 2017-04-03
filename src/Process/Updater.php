@@ -2,7 +2,7 @@
 
 namespace Nwidart\Modules\Process;
 
-use Nwidart\Modules\Module;
+use Nwidart\Modules\ModuleInterface;
 
 class Updater extends Runner
 {
@@ -23,9 +23,9 @@ class Updater extends Runner
     }
 
     /**
-     * @param Module $module
+     * @param ModuleInterface $module
      */
-    private function installRequires(Module $module)
+    private function installRequires(ModuleInterface $module)
     {
         $packages = $module->getComposerAttr('require', []);
 
@@ -37,9 +37,9 @@ class Updater extends Runner
     }
 
     /**
-     * @param Module $module
+     * @param ModuleInterface $module
      */
-    private function installDevRequires(Module $module)
+    private function installDevRequires(ModuleInterface $module)
     {
         $devPackages = $module->getComposerAttr('require-dev', []);
 
@@ -51,9 +51,9 @@ class Updater extends Runner
     }
 
     /**
-     * @param Module $module
+     * @param ModuleInterface $module
      */
-    private function copyScriptsToMainComposerJson(Module $module)
+    private function copyScriptsToMainComposerJson(ModuleInterface $module)
     {
         $scripts = $module->getComposerAttr('scripts', []);
 

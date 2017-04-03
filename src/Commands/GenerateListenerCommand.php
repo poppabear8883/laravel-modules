@@ -2,7 +2,7 @@
 
 namespace Nwidart\Modules\Commands;
 
-use Nwidart\Modules\Module;
+use Nwidart\Modules\ModuleInterface;
 use Nwidart\Modules\Support\Stub;
 use Nwidart\Modules\Traits\ModuleCommandTrait;
 use Symfony\Component\Console\Input\InputArgument;
@@ -92,7 +92,7 @@ class GenerateListenerCommand extends GeneratorCommand
         parent::fire();
     }
 
-    protected function getEventName(Module $module)
+    protected function getEventName(ModuleInterface $module)
     {
         return $this->getClassNamespace($module) . "\\" . config('modules.paths.generator.event') . "\\" . $this->option('event');
     }

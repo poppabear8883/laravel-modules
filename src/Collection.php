@@ -25,7 +25,7 @@ class Collection extends BaseCollection
     public function toArray()
     {
         return array_map(function ($value) {
-            if ($value instanceof Module) {
+            if ($value instanceof ModuleInterface) {
                 return $value->json()->getAttributes();
             }
 

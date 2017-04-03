@@ -46,7 +46,7 @@ class PublishMigrationCommand extends Command
     /**
      * Publish migration for the specified module.
      *
-     * @param \Nwidart\Modules\Module $module
+     * @param \Nwidart\Modules\ModuleInterface $module
      */
     public function publish($module)
     {

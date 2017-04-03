@@ -4,7 +4,7 @@ namespace Nwidart\Modules\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use Nwidart\Modules\Module;
+use Nwidart\Modules\ModuleInterface;
 use Nwidart\Modules\Repository;
 use Nwidart\Modules\Traits\ModuleCommandTrait;
 use RuntimeException;
@@ -70,7 +70,7 @@ class SeedCommand extends Command
      *
      * @throws RuntimeException
      *
-     * @return Module
+     * @return ModuleInterface
      */
     public function getModuleByName($name)
     {
@@ -83,11 +83,11 @@ class SeedCommand extends Command
     }
 
     /**
-     * @param Module $module
+     * @param ModuleInterface $module
      *
      * @return void
      */
-    public function moduleSeed(Module $module)
+    public function moduleSeed(ModuleInterface $module)
     {
         $seeders = [];
         $name = $module->getName();

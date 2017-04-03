@@ -126,7 +126,7 @@ class Repository implements RepositoryInterface, Countable
             foreach ($manifests as $manifest) {
                 $name = Json::make($manifest)->get('name');
 
-                $modules[$name] = new Module($this->app, $name, dirname($manifest));
+                $modules[$name] = new ModuleInterface($this->app, $name, dirname($manifest));
             }
         }
 
@@ -161,7 +161,7 @@ class Repository implements RepositoryInterface, Countable
         foreach ($cached as $name => $module) {
             $path = $this->config('paths.modules') . '/' . $name;
 
-            $modules[$name] = new Module($this->app, $name, $path);
+            $modules[$name] = new ModuleInterface($this->app, $name, $path);
         }
 
         return $modules;
@@ -262,7 +262,7 @@ class Repository implements RepositoryInterface, Countable
     {
         $modules = $this->enabled();
 
-        uasort($modules, function (Module $a, Module $b) use ($direction) {
+        uasort($modules, function (ModuleInterface $a, ModuleInterface $b) use ($direction) {
             if ($a->order == $b->order) {
                 return 0;
             }
@@ -310,7 +310,7 @@ class Repository implements RepositoryInterface, Countable
     /**
      * Find a specific module.
      * @param $name
-     * @return mixed|void
+     * @return mixed
      */
     public function find($name)
     {
@@ -320,13 +320,13 @@ class Repository implements RepositoryInterface, Countable
             }
         }
 
-        return;
+        return null;
     }
 
     /**
      * Find a specific module by its alias.
      * @param $alias
-     * @return mixed|void
+     * @return mixed
      */
     public function findByAlias($alias)
     {
@@ -336,7 +336,7 @@ class Repository implements RepositoryInterface, Countable
             }
         }
 
-        return;
+        return null;
     }
 
     /**
@@ -362,7 +362,7 @@ class Repository implements RepositoryInterface, Countable
     /**
      * Alternative for "find" method.
      * @param $name
-     * @return mixed|void
+     * @return mixed
      */
     public function get($name)
     {
@@ -374,7 +374,7 @@ class Repository implements RepositoryInterface, Countable
      *
      * @param $name
      *
-     * @return Module
+     * @return ModuleInterface
      *
      * @throws ModuleNotFoundException
      */

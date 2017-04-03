@@ -3,19 +3,19 @@
 namespace Nwidart\Modules\tests;
 
 use Nwidart\Modules\Json;
-use Nwidart\Modules\Module;
+use Nwidart\Modules\ModuleInterface;
 
 class ModuleTest extends BaseTestCase
 {
     /**
-     * @var Module
+     * @var ModuleInterface
      */
     private $module;
 
     public function setUp()
     {
         parent::setUp();
-        $this->module = new Module($this->app, 'Recipe', __DIR__ . '/stubs/Recipe');
+        $this->module = new ModuleInterface($this->app, 'Recipe', __DIR__ . '/stubs/Recipe');
     }
 
     /** @test */

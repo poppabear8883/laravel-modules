@@ -5,7 +5,7 @@ namespace Nwidart\Modules\tests;
 use Illuminate\Filesystem\Filesystem;
 use Nwidart\Modules\Collection;
 use Nwidart\Modules\Exceptions\ModuleNotFoundException;
-use Nwidart\Modules\Module;
+use Nwidart\Modules\ModuleInterface;
 use Nwidart\Modules\Repository;
 
 class RepositoryTest extends BaseTestCase
@@ -73,8 +73,8 @@ class RepositoryTest extends BaseTestCase
     {
         $this->repository->addLocation(__DIR__ . '/stubs/Recipe');
 
-        $this->assertInstanceOf(Module::class, $this->repository->find('recipe'));
-        $this->assertInstanceOf(Module::class, $this->repository->get('recipe'));
+        $this->assertInstanceOf(ModuleInterface::class, $this->repository->find('recipe'));
+        $this->assertInstanceOf(ModuleInterface::class, $this->repository->get('recipe'));
     }
 
     /** @test */
@@ -83,8 +83,8 @@ class RepositoryTest extends BaseTestCase
         $this->repository->addLocation(__DIR__ . '/stubs/Recipe');
         $this->repository->addLocation(__DIR__ . '/stubs/Requirement');
 
-        $this->assertInstanceOf(Module::class, $this->repository->findByAlias('recipe'));
-        $this->assertInstanceOf(Module::class, $this->repository->findByAlias('required_module'));
+        $this->assertInstanceOf(ModuleInterface::class, $this->repository->findByAlias('recipe'));
+        $this->assertInstanceOf(ModuleInterface::class, $this->repository->findByAlias('required_module'));
     }
 
     /** @test */
@@ -220,6 +220,6 @@ class RepositoryTest extends BaseTestCase
         $requirements = $this->repository->findRequirements('Recipe');
 
         $this->assertCount(1, $requirements);
-        $this->assertInstanceOf(Module::class, $requirements[0]);
+        $this->assertInstanceOf(ModuleInterface::class, $requirements[0]);
     }
 }
