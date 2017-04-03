@@ -7,7 +7,6 @@ use Nwidart\Modules\Contracts\ModuleInterface;
 
 class EloquentModule extends Model implements ModuleInterface
 {
-
     /**
      * Get laravel instance.
      *
@@ -25,7 +24,6 @@ class EloquentModule extends Model implements ModuleInterface
      */
     public function getName()
     {
-
     }
 
     /**

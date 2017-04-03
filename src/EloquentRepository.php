@@ -4,7 +4,6 @@ namespace Nwidart\Modules;
 
 class EloquentRepository extends Repository
 {
-
     /**
      * Get & scan all modules.
      *
@@ -38,7 +37,7 @@ class EloquentRepository extends Repository
                     $module = EloquentModule::create([
                         'name' => $name,
                         'alias' => strtolower($name),
-                        'description' => $description
+                        'description' => $description,
                     ]);
                 } else {
                     /*
@@ -50,7 +49,7 @@ class EloquentRepository extends Repository
                         'alias' => strtolower($name),
                         'description' => $description,
                         'active' => $active,
-                        'order' => $order
+                        'order' => $order,
                     ]);
                 }
 
