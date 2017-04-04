@@ -8,7 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Nwidart\Modules\Contracts\ModuleInterface;
 
-class ModuleInterface extends ServiceProvider implements ModuleInterface
+class Module extends ServiceProvider implements ModuleInterface
 {
     /**
      * The laravel application instance.

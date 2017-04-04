@@ -3,47 +3,20 @@
 namespace Nwidart\Modules;
 
 use Illuminate\Database\Eloquent\Model;
-use Nwidart\Modules\Contracts\ModuleInterface;
+use Illuminate\Foundation\Application;
 
-class EloquentModule extends Model implements ModuleInterface
+class EloquentModule extends Module
 {
     /**
-     * Get laravel instance.
-     *
-     * @return \Illuminate\Foundation\Application
+     * @var Model
      */
-    public function getLaravel()
-    {
-        return app();
-    }
+    protected $model;
 
-    /**
-     * Get name.
-     *
-     * @return string
-     */
-    public function getName()
+    public function __construct(Application $app, $name, $path, Model $model)
     {
-    }
+        parent::__construct($app, $name, $path);
 
-    /**
-     * Get name in lower case.
-     *
-     * @return string
-     */
-    public function getLowerName()
-    {
-        // TODO: Implement getLowerName() method.
-    }
-
-    /**
-     * Get name in studly case.
-     *
-     * @return string
-     */
-    public function getStudlyName()
-    {
-        // TODO: Implement getStudlyName() method.
+        $this->model = $model;
     }
 
     /**
