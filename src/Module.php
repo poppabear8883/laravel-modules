@@ -2,17 +2,19 @@
 
 namespace Nwidart\Modules;
 
-use Illuminate\Foundation\AliasLoader;
-use Illuminate\Foundation\Application;
+use Illuminate\Container\Container;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Macroable;
 
-class Module extends ServiceProvider
+abstract class Module extends ServiceProvider
 {
+    use Macroable;
+
     /**
-     * The laravel application instance.
+     * The laravel|lumen application instance.
      *
-     * @var Application
+     * @var \Illuminate\Contracts\Foundation\Application|Laravel\Lumen\Application
      */
     protected $app;
 
@@ -24,22 +26,27 @@ class Module extends ServiceProvider
     protected $name;
 
     /**
-     * The module path,.
+     * The module path.
      *
      * @var string
      */
     protected $path;
 
     /**
+     * @var array of cached Json objects, keyed by filename
+     */
+    protected $moduleJson = [];
+
+    /**
      * The constructor.
      *
-     * @param Application $app
+     * @param Container $app
      * @param $name
      * @param $path
      */
-    public function __construct(Application $app, $name, $path)
+    public function __construct(Container $app, $name, $path)
     {
-        $this->app = $app;
+        parent::__construct($app);
         $this->name = $name;
         $this->path = realpath($path);
     }
@@ -47,7 +54,7 @@ class Module extends ServiceProvider
     /**
      * Get laravel instance.
      *
-     * @return \Illuminate\Foundation\Application
+     * @return \Illuminate\Contracts\Foundation\Application|Laravel\Lumen\Application
      */
     public function getLaravel()
     {
@@ -82,6 +89,16 @@ class Module extends ServiceProvider
     public function getStudlyName()
     {
         return Str::studly($this->name);
+    }
+
+    /**
+     * Get name in snake case.
+     *
+     * @return string
+     */
+    public function getSnakeName()
+    {
+        return Str::snake($this->name);
     }
 
     /**
@@ -157,6 +174,10 @@ class Module extends ServiceProvider
             $this->registerTranslation();
         }
 
+        if ($this->isLoadFilesOnBoot()) {
+            $this->registerFiles();
+        }
+
         $this->fireEvent('boot');
     }
 
@@ -169,7 +190,7 @@ class Module extends ServiceProvider
     {
         $lowerName = $this->getLowerName();
 
-        $langPath = $this->getPath() . "/Resources/lang";
+        $langPath = $this->getPath() . '/Resources/lang';
 
         if (is_dir($langPath)) {
             $this->loadTranslationsFrom($langPath, $lowerName);
@@ -177,28 +198,32 @@ class Module extends ServiceProvider
     }
 
     /**
-     * Get json contents.
+     * Get json contents from the cache, setting as needed.
+     *
+     * @param string $file
      *
      * @return Json
      */
-    public function json($file = null)
+    public function json($file = null) : Json
     {
-        if (is_null($file)) {
+        if ($file === null) {
             $file = 'module.json';
         }
 
-        return new Json($this->getPath() . '/' . $file, $this->app['files']);
+        return array_get($this->moduleJson, $file, function () use ($file) {
+            return $this->moduleJson[$file] = new Json($this->getPath() . '/' . $file, $this->app['files']);
+        });
     }
 
     /**
      * Get a specific data from json file by given the key.
      *
-     * @param $key
+     * @param string $key
      * @param null $default
      *
      * @return mixed
      */
-    public function get($key, $default = null)
+    public function get(string $key, $default = null)
     {
         return $this->json()->get($key, $default);
     }
@@ -225,7 +250,9 @@ class Module extends ServiceProvider
 
         $this->registerProviders();
 
-        $this->registerFiles();
+        if ($this->isLoadFilesOnBoot() === false) {
+            $this->registerFiles();
+        }
 
         $this->fireEvent('register');
     }
@@ -239,27 +266,22 @@ class Module extends ServiceProvider
     {
         $this->app['events']->fire(sprintf('modules.%s.' . $event, $this->getLowerName()), [$this]);
     }
-
     /**
      * Register the aliases from this module.
      */
-    protected function registerAliases()
-    {
-        $loader = AliasLoader::getInstance();
-        foreach ($this->get('aliases', []) as $aliasName => $aliasClass) {
-            $loader->alias($aliasName, $aliasClass);
-        }
-    }
+    abstract public function registerAliases();
 
     /**
      * Register the service providers from this module.
      */
-    protected function registerProviders()
-    {
-        foreach ($this->get('providers', []) as $provider) {
-            $this->app->register($provider);
-        }
-    }
+    abstract public function registerProviders();
+
+    /**
+     * Get the path to the cached *_module.php file.
+     *
+     * @return string
+     */
+    abstract public function getCachedServicesPath();
 
     /**
      * Register the files from this module.
@@ -288,7 +310,7 @@ class Module extends ServiceProvider
      *
      * @return bool
      */
-    public function isStatus($status)
+    public function isStatus($status) : bool
     {
         return $this->get('active', 0) === $status;
     }
@@ -298,15 +320,16 @@ class Module extends ServiceProvider
      *
      * @return bool
      */
-    public function enabled()
+    public function enabled() : bool
     {
-        return $this->active();
+        return $this->isStatus(1);
     }
 
     /**
      * Alternate for "enabled" method.
      *
      * @return bool
+     * @deprecated
      */
     public function active()
     {
@@ -317,6 +340,7 @@ class Module extends ServiceProvider
      * Determine whether the current module not activated.
      *
      * @return bool
+     * @deprecated
      */
     public function notActive()
     {
@@ -324,11 +348,11 @@ class Module extends ServiceProvider
     }
 
     /**
-     * Alias for "notActive" method.
+     *  Determine whether the current module not disabled.
      *
      * @return bool
      */
-    public function disabled()
+    public function disabled() : bool
     {
         return !$this->enabled();
     }
@@ -347,16 +371,14 @@ class Module extends ServiceProvider
 
     /**
      * Disable the current module.
-     *
-     * @return bool
      */
     public function disable()
     {
-        $this->app['events']->fire('module.disabling', [$this]);
+        $this->fireEvent('disabling');
 
         $this->setActive(0);
 
-        $this->app['events']->fire('module.disabled', [$this]);
+        $this->fireEvent('disabled');
     }
 
     /**
@@ -364,11 +386,11 @@ class Module extends ServiceProvider
      */
     public function enable()
     {
-        $this->app['events']->fire('module.enabling', [$this]);
+        $this->fireEvent('enabling');
 
         $this->setActive(1);
 
-        $this->app['events']->fire('module.enabled', [$this]);
+        $this->fireEvent('enabled');
     }
 
     /**
@@ -384,11 +406,11 @@ class Module extends ServiceProvider
     /**
      * Get extra path.
      *
-     * @param $path
+     * @param string $path
      *
      * @return string
      */
-    public function getExtraPath($path)
+    public function getExtraPath(string $path) : string
     {
         return $this->getPath() . '/' . $path;
     }
@@ -403,5 +425,17 @@ class Module extends ServiceProvider
     public function __get($key)
     {
         return $this->get($key);
+    }
+
+    /**
+     * Check if can load files of module on boot method.
+     *
+     * @return bool
+     */
+    protected function isLoadFilesOnBoot()
+    {
+        return config('modules.register.files', 'register') === 'boot' &&
+            // force register method if option == boot && app is AsgardCms
+            !class_exists('\Modules\Core\Foundation\AsgardCms');
     }
 }

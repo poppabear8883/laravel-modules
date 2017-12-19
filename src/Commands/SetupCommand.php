@@ -22,10 +22,8 @@ class SetupCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return mixed
      */
-    public function fire()
+    public function handle()
     {
         $this->generateModulesFolder();
 
@@ -37,7 +35,8 @@ class SetupCommand extends Command
      */
     public function generateModulesFolder()
     {
-        $this->generateDirectory($this->laravel['modules']->config('paths.modules'),
+        $this->generateDirectory(
+            $this->laravel['modules']->config('paths.modules'),
             'Modules directory created successfully',
             'Modules directory already exist'
         );
@@ -48,7 +47,8 @@ class SetupCommand extends Command
      */
     public function generateAssetsFolder()
     {
-        $this->generateDirectory($this->laravel['modules']->config('paths.assets'),
+        $this->generateDirectory(
+            $this->laravel['modules']->config('paths.assets'),
             'Assets directory created successfully',
             'Assets directory already exist'
         );

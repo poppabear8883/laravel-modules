@@ -23,10 +23,8 @@ class DisableCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return mixed
      */
-    public function fire()
+    public function handle()
     {
         $module = $this->laravel['modules']->findOrFail($this->argument('module'));
 
@@ -46,8 +44,8 @@ class DisableCommand extends Command
      */
     protected function getArguments()
     {
-        return array(
-            array('module', InputArgument::REQUIRED, 'Module name.'),
-        );
+        return [
+            ['module', InputArgument::REQUIRED, 'Module name.'],
+        ];
     }
 }

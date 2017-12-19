@@ -7,6 +7,7 @@ use Illuminate\Console\Command as Console;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use Nwidart\Modules\Repository;
+use Nwidart\Modules\Support\Config\GenerateConfigReader;
 use Nwidart\Modules\Support\Stub;
 
 class ModuleGenerator extends Generator
@@ -210,7 +211,7 @@ class ModuleGenerator extends Generator
      */
     public function getFolders()
     {
-        return array_values($this->module->config('paths.generator'));
+        return $this->module->config('paths.generator');
     }
 
     /**
@@ -256,10 +257,15 @@ class ModuleGenerator extends Generator
 
         $this->generateFolders();
 
-        $this->generateFiles();
+        $this->generateModuleJsonFile();
 
-        if (!$this->plain) {
+        if ($this->plain !== true) {
+            $this->generateFiles();
             $this->generateResources();
+        }
+
+        if ($this->plain === true) {
+            $this->cleanModuleJsonFile();
         }
 
         $this->console->info("Module [{$name}] created successfully.");
@@ -270,12 +276,19 @@ class ModuleGenerator extends Generator
      */
     public function generateFolders()
     {
-        foreach ($this->getFolders() as $folder) {
-            $path = $this->module->getModulePath($this->getName()) . '/' . $folder;
+        foreach ($this->getFolders() as $key => $folder) {
+            $folder = GenerateConfigReader::read($key);
+
+            if ($folder->generate() === false) {
+                continue;
+            }
+
+            $path = $this->module->getModulePath($this->getName()) . '/' . $folder->getPath();
 
             $this->filesystem->makeDirectory($path, 0755, true);
-
-            $this->generateGitKeep($path);
+            if (config('modules.stubs.gitkeep')) {
+                $this->generateGitKeep($path);
+            }
         }
     }
 
@@ -335,13 +348,14 @@ class ModuleGenerator extends Generator
      *
      * @param $stub
      *
-     * @return Stub
+     * @return string
      */
     protected function getStubContents($stub)
     {
         return (new Stub(
             '/' . $stub . '.stub',
-            $this->getReplacement($stub))
+            $this->getReplacement($stub)
+        )
         )->render();
     }
 
@@ -374,13 +388,48 @@ class ModuleGenerator extends Generator
 
         foreach ($keys as $key) {
             if (method_exists($this, $method = 'get' . ucfirst(studly_case(strtolower($key))) . 'Replacement')) {
-                $replaces[$key] = call_user_func([$this, $method]);
+                $replaces[$key] = $this->$method();
             } else {
                 $replaces[$key] = null;
             }
         }
 
         return $replaces;
+    }
+
+    /**
+     * Generate the module.json file
+     */
+    private function generateModuleJsonFile()
+    {
+        $path = $this->module->getModulePath($this->getName()) . 'module.json';
+
+        if (!$this->filesystem->isDirectory($dir = dirname($path))) {
+            $this->filesystem->makeDirectory($dir, 0775, true);
+        }
+
+        $this->filesystem->put($path, $this->getStubContents('json'));
+
+        $this->console->info("Created : {$path}");
+    }
+
+    /**
+     * Remove the default service provider that was added in the module.json file
+     * This is needed when a --plain module was created
+     */
+    private function cleanModuleJsonFile()
+    {
+        $path = $this->module->getModulePath($this->getName()) . 'module.json';
+
+        $content = $this->filesystem->get($path);
+        $namespace = $this->getModuleNamespaceReplacement();
+        $studlyName = $this->getStudlyNameReplacement();
+
+        $provider = '"' . $namespace . '\\\\' . $studlyName . '\\\\Providers\\\\' . $studlyName . 'ServiceProvider"';
+
+        $content = str_replace($provider, '', $content);
+
+        $this->filesystem->put($path, $content);
     }
 
     /**
@@ -441,5 +490,10 @@ class ModuleGenerator extends Generator
     protected function getAuthorEmailReplacement()
     {
         return $this->module->config('composer.author.email');
+    }
+
+    protected function getRoutesLocationReplacement()
+    {
+        return '/' . $this->module->config('stubs.files.routes');
     }
 }

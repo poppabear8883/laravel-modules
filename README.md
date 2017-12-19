@@ -8,8 +8,12 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/nWidart/laravel-modules.svg?style=flat-square)](https://scrutinizer-ci.com/g/nWidart/laravel-modules)
 [![Total Downloads](https://img.shields.io/packagist/dt/nwidart/laravel-modules.svg?style=flat-square)](https://packagist.org/packages/nwidart/laravel-modules)
 
+| **Laravel**  |  **laravel-modules** |
+|---|---|
+| 5.4  | ^1.0  |
+| 5.5  | ^2.0  |
 
-`nwidart/laravel-modules` is a laravel package which created to manage your large laravel app using modules. Module is like a laravel package, it has some views, controllers or models. This package is supported and tested in Laravel 5.
+`nwidart/laravel-modules` is a Laravel package which created to manage your large Laravel app using modules. Module is like a Laravel package, it has some views, controllers or models. This package is supported and tested in Laravel 5.
 
 This package is a re-published, re-organised and maintained version of [pingpong/modules](https://github.com/pingpong-labs/modules), which isn't maintained anymore. This package is used in [AsgardCMS](https://asgardcms.com/).
 
@@ -19,31 +23,15 @@ Find out why you should use this package in the article: [Writing modular applic
 
 ## Install
 
-To install through composer, by run the following command:
+To install through Composer, by run the following command:
 
 ``` bash
 composer require nwidart/laravel-modules
 ```
 
-### Add Service Provider
+The package will automatically register a service provider and alias.
 
-Next add the following service provider in `config/app.php`.
-
-``` php
-'providers' => [
-  Nwidart\Modules\LaravelModulesServiceProvider::class,
-],
-```
-
-Next, add the following aliases to `aliases` array in the same file.
-
-``` php
-'aliases' => [
-  'Module' => Nwidart\Modules\Facades\Module::class,
-],
-```
-
-Next publish the package's configuration file by running :
+Optionally, publish the package's configuration file by running:
 
 ``` bash
 php artisan vendor:publish --provider="Nwidart\Modules\LaravelModulesServiceProvider"
@@ -51,7 +39,7 @@ php artisan vendor:publish --provider="Nwidart\Modules\LaravelModulesServiceProv
 
 ### Autoloading
 
-By default the module classes are not loaded automatically. You can autoload your modules using `psr-4`. For example :
+By default the module classes are not loaded automatically. You can autoload your modules using `psr-4`. For example:
 
 ``` json
 {
@@ -63,6 +51,8 @@ By default the module classes are not loaded automatically. You can autoload you
   }
 }
 ```
+
+**Tip: don't forget to run `composer dump-autoload` afterwards.**
 
 ## Documentation
 
@@ -76,7 +66,7 @@ You'll find installation instructions and full documentation on [https://nwidart
 
 ## About Nicolas Widart
 
-Nicolas Widart is a freelance web developer specialising on the laravel framework. View all my packages [on my website](https://nicolaswidart.com/projects).
+Nicolas Widart is a freelance web developer specialising on the Laravel framework. View all my packages [on my website](https://nicolaswidart.com/projects).
 
 
 ## License
